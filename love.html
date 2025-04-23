@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心形动画 - 献给TA</title>
+    <!-- 添加Google Fonts优雅字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Ma+Shan+Zheng&family=Pacifico&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <!-- 添加Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'ZCOOL XiaoWei', 'Ma Shan Zheng', sans-serif;
+            color: #fff;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #heart-canvas {
+            position: absolute;
+            z-index: 2;
+        }
+
+        .love-text {
+            position: absolute;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .name {
+            color: #ff9de2;
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Dancing Script', 'Ma Shan Zheng', cursive;
+            text-shadow: 0 0 10px rgba(255, 157, 226, 0.7), 0 0 20px rgba(255, 157, 226, 0.5);
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out 2s forwards, glowing 1.5s ease-in-out infinite alternate;
+            letter-spacing: 2px;
+        }
+
+        .message {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-top: 15px;
+            opacity: 0;
+            max-width: 80vw;
+            animation: fadeIn 3s ease-in-out 3s forwards, float 6s ease-in-out infinite;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        /* 添加装饰图标样式 */
+        .decorative-icons {
+            position: absolute;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .icon {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            animation: float 6s ease-in-out infinite, spin 10s linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .control-panel:hover {
+            opacity: 1;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glowing {
+            from { text-shadow: 0 0 10px rgba(255, 157, 226, 0.7), 0 0 20px rgba(255, 157, 226, 0.4); }
+            to { text-shadow: 0 0 15px rgba(255, 157, 226, 1), 0 0 30px rgba(255, 157, 226, 0.8), 0 0 45px rgba(255, 157, 226, 0.6); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="matrix-canvas"></canvas>
+        <canvas id="heart-canvas"></canvas>
+
+        <!-- 添加装饰图标 -->
+        <div class="decorative-icons" id="decorative-icons"></div>
+
+        <div class="love-text">
+            <div class="name">TA</div>
+            <div class="message">心与心的距离，从不以时间计算</div>
+        </div>
+
+        <!-- 添加控制面板 -->
+        <div class="control-panel">
+            <div class="control-btn" id="color-btn" title="更换颜色">
+                <i class="fas fa-palette"></i>
+            </div>
+            <div class="control-btn" id="music-btn" title="背景音乐">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="control-btn" id="fullscreen-btn" title="全屏显示">
+                <i class="fas fa-expand"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 矩阵数字雨效果
+        const matrixCanvas = document.getElementById('matrix-canvas');
+        const matrixCtx = matrixCanvas.getContext('2d');
+
+        // 设置Canvas尺寸为窗口大小
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+
+        // 矩阵效果参数
+        const matrixChars = "TA我爱你❤💕💓💗💖";  // 增加更多爱心符号
+        const fontSize = 16;
+        const columns = matrixCanvas.width / fontSize;
+
+        // 创建降落的起始点
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * matrixCanvas.height / fontSize) - 100;
+        }
+
+        // 绘制矩阵效果
+        function drawMatrix() {
+            // 设置半透明黑色背景，形成拖尾效果
+            matrixCtx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+            // 循环遍历每一列
+            for (let i = 0; i < drops.length; i++) {
+                // 随机选择一个字符
+                const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+
+                // 提升一些字符的亮度，使效果更生动，使用更丰富的颜色
+                if (Math.random() > 0.97) {
+                    matrixCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                } else if (Math.random() > 0.94) {
+                    matrixCtx.fillStyle = "rgba(255, 157, 226, 0.9)"; // 亮粉色
+                } else if (Math.random() > 0.9) {
+                    matrixCtx.fillStyle = "rgba(186, 104, 200, 0.8)"; // 紫色
+                } else if (Math.random() > 0.85) {
+                    matrixCtx.fillStyle = "rgba(111, 168, 220, 0.8)"; // 蓝色
+                } else {
+                    matrixCtx.fillStyle = "rgba(255, 157, 226, 0.4)";
+                }
+
+                matrixCtx.font = fontSize + "px arial";
+
+                // 在指定位置绘制字符
+                matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // 如果达到底部或随机条件，重置到顶部
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                // 向下移动
+                drops[i]++;
+            }
+        }
+
+        // 定期更新矩阵效果
+        setInterval(drawMatrix, 50);
+
+        // 心形粒子效果
+        const heartCanvas = document.getElementById('heart-canvas');
+        const heartCtx = heartCanvas.getContext('2d');
+
+        heartCanvas.width = window.innerWidth;
+        heartCanvas.height = window.innerHeight;
+
+        // 粒子参数设置
+        const particleCount = 2500;  // 增加粒子数量，使心形更密集
+        const particleSize = 3.5;    // 略微增大粒子
+        const particleColor = "#ff9de2"; // 更亮的粉色爱心
+        // 定义多种粒子颜色，创建渐变效果
+        const particleColors = [
+            "#ff9de2", // 粉色
+            "#ff85d5", // 深粉色
+            "#ffd4f0", // 浅粉色
+            "#ff5cb8", // 亮粉色
+            "#ffb8e0"  // 中粉色
+        ];
+        const heartSize = 11;        // 略微增大心形
+        const pulseFactor = 0.09;    // 增加脉动幅度
+        const flowSpeed = 0.85;      // 略微增加流动速度
+
+        // 粒子类
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            // 重置粒子位置与属性
+            reset() {
+                // 随机角度
+                this.angle = Math.random() * Math.PI * 2;
+                // 随机距离
+                this.radius = Math.random() * heartSize;
+                // 初始位置
+                this.x = 0;
+                this.y = 0;
+                // 添加一些随机性，使粒子出现在心形周围
+                this.vx = Math.random() * 2 - 1;
+                this.vy = Math.random() * 2 - 1;
+                // 粒子大小
+                this.size = Math.random() * particleSize + 1;
+                // 透明度
+                this.alpha = Math.random() * 0.6 + 0.4;
+                // 粒子生命周期
+                this.life = Math.random() * 100 + 100;
+                this.maxLife = this.life;
+                // 粒子类型 - 引入更多类型增加多样性
+                if (Math.random() > 0.97) {
+                    this.type = 'sparkle'; // 闪烁粒子
+                } else if (Math.random() > 0.9) {
+                    this.type = 'special'; // 特殊粒子
+                } else {
+                    this.type = 'normal';  // 普通粒子
+                }
+
+                // 随机选择粒子颜色
+                this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+            }
+
+            // 更新粒子状态
+            update(time) {
+                // 使粒子围绕心形移动
+                this.angle += flowSpeed * 0.01;
+
+                // 心形方程，产生心形轨迹
+                // x = 16 * sin(t)^3
+                // y = 13 * cos(t) - 5 * cos(2t) - 2 * cos(3t) - cos(4t)
+                const heartX = 16 * Math.pow(Math.sin(this.angle), 3);
+                const heartY = -(13 * Math.cos(this.angle) - 5 * Math.cos(2 * this.angle) - 2 * Math.cos(3 * this.angle) - Math.cos(4 * this.angle));
+
+                // 计算目标位置，添加脉动效果
+                const pulse = 1 + Math.sin(time * pulseFactor) * 0.2;
+                const targetX = heartX * this.radius * pulse;
+                const targetY = heartY * this.radius * pulse;
+
+                // 平滑移动到目标位置
+                this.x += (targetX - this.x) * 0.1;
+                this.y += (targetY - this.y) * 0.1;
+
+                // 减少生命值
+                this.life--;
+
+                // 特殊粒子行为
+                if (this.type === 'special') {
+                    this.alpha = 0.4 + Math.abs(Math.sin(time * 0.2 + this.angle)) * 0.6;
+                    this.size = Math.random() * particleSize * 1.5 + 1.5;
+                } else if (this.type === 'sparkle') {
+                    // 闪烁粒子有更强的闪烁效果
+                    this.alpha = 0.2 + Math.abs(Math.sin(time * 0.4 + this.angle)) * 0.8;
+                    this.size = Math.random() * particleSize * 2 + 2;
+                }
+
+                // 当生命结束时重置粒子
+                if (this.life <= 0) {
+                    this.reset();
+                }
+            }
+
+            // 绘制粒子
+            draw(ctx) {
+                // 随着生命周期变化透明度
+                const alphaFade = this.life / this.maxLife;
+
+                // 设置填充样式
+                let color = this.color || particleColor;
+
+                if (this.type === 'special') {
+                    // 特殊粒子颜色 - 偏白色或更亮的粉色
+                    color = Math.random() > 0.5 ? "#ffb6c1" : "#ffffff";
+                } else if (this.type === 'sparkle') {
+                    // 闪烁粒子 - 使用白色或金色
+                    color = Math.random() > 0.5 ? "#ffffff" : "#ffd700";
+                }
+
+                ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade})`;
+
+                // 开始绘制粒子
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 对特殊粒子添加发光效果
+                if ((this.type === 'special' || this.type === 'sparkle') && this.alpha > 0.6) {
+                    // 添加更强的发光效果
+                    const glowSize = this.type === 'sparkle' ? 2.5 : 1.8;
+                    const glowOpacity = this.type === 'sparkle' ? 0.5 : 0.3;
+
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * glowSize, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade * glowOpacity})`;
+                    ctx.fill();
+
+                    // 为闪烁粒子添加第二层发光
+                    if (this.type === 'sparkle') {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade * 0.15})`;
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        // 辅助函数：将十六进制颜色转换为RGB
+        function hexToRgb(hex) {
+            // 移除#号
+            hex = hex.replace('#', '');
+
+            // 解析RGB值
+            const bigint = parseInt(hex, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+
+            return `${r}, ${g}, ${b}`;
+        }
+
+        // 创建粒子数组
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // 动画时间
+        let time = 0;
+
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 清除画布
+            heartCtx.clearRect(0, 0, heartCanvas.width, heartCanvas.height);
+
+            // 移动画布中心到屏幕中心
+            heartCtx.save();
+            heartCtx.translate(heartCanvas.width / 2, heartCanvas.height / 2);
+
+            // 更新并绘制所有粒子
+            for (const particle of particles) {
+                particle.update(time);
+                particle.draw(heartCtx);
+            }
+
+            // 可选：绘制发光边缘
+            drawGlowingEdge();
+
+            heartCtx.restore();
+
+            // 增加时间
+            time += 0.1;
+        }
+
+        // 绘制发光边缘
+        function drawGlowingEdge() {
+            const maxRadius = heartSize * 18; // 增大最大半径
+            const glowGradient = heartCtx.createRadialGradient(0, 0, maxRadius * 0.6, 0, 0, maxRadius);
+
+            // 创建更丰富的渐变
+            glowGradient.addColorStop(0, `rgba(${hexToRgb(particleColors[0])}, 0.15)`);
+            glowGradient.addColorStop(0.5, `rgba(${hexToRgb(particleColors[2])}, 0.08)`);
+            glowGradient.addColorStop(0.8, `rgba(${hexToRgb(particleColors[4])}, 0.04)`);
+            glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            heartCtx.fillStyle = glowGradient;
+            heartCtx.beginPath();
+            heartCtx.arc(0, 0, maxRadius, 0, Math.PI * 2);
+            heartCtx.fill();
+        }
+
+        // 开始动画
+        animate();
+
+        // 创建装饰图标
+        function createDecorativeIcons() {
+            const iconsContainer = document.getElementById('decorative-icons');
+            iconsContainer.innerHTML = ''; // 清空现有图标
+
+            // 定义可用的图标
+            const icons = [
+                'fa-heart', 'fa-star', 'fa-music', 'fa-moon', 'fa-sun',
+                'fa-dove', 'fa-snowflake', 'fa-sparkles', 'fa-heart-pulse'
+            ];
+
+            // 创建20个随机图标
+            for (let i = 0; i < 20; i++) {
+                const icon = document.createElement('i');
+                const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+
+                icon.className = `icon fas ${randomIcon}`;
+                icon.style.fontSize = `${Math.random() * 15 + 10}px`;
+                icon.style.left = `${Math.random() * 100}%`;
+                icon.style.top = `${Math.random() * 100}%`;
+                icon.style.opacity = `${Math.random() * 0.5 + 0.2}`;
+
+                // 随机动画延迟和持续时间
+                icon.style.animationDelay = `${Math.random() * 5}s`;
+                icon.style.animationDuration = `${Math.random() * 10 + 5}s`;
+
+                iconsContainer.appendChild(icon);
+            }
+        }
+
+        // 创建装饰图标
+        createDecorativeIcons();
+
+        // 控制面板功能
+        document.getElementById('color-btn').addEventListener('click', function() {
+            // 随机生成新的颜色方案
+            const hue = Math.floor(Math.random() * 360);
+            const newColors = [
+                `hsl(${hue}, 100%, 80%)`,
+                `hsl(${hue}, 90%, 70%)`,
+                `hsl(${hue}, 80%, 85%)`,
+                `hsl(${hue}, 100%, 65%)`,
+                `hsl(${hue}, 85%, 75%)`
+            ];
+
+            // 更新粒子颜色
+            for (let i = 0; i < particleColors.length; i++) {
+                particleColors[i] = newColors[i];
+            }
+
+            // 更新名称颜色
+            document.querySelector('.name').style.color = newColors[0];
+            document.querySelector('.name').style.textShadow = `0 0 10px ${newColors[0]}80, 0 0 20px ${newColors[0]}50`;
+        });
+
+        // 全屏功能
+        document.getElementById('fullscreen-btn').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    this.innerHTML = '<i class="fas fa-expand"></i>';
+                }
+            }
+        });
+
+        // 音乐按钮功能 - 使用内置音频合成
+        let audioContext = null;
+        let oscillator = null;
+        let gainNode = null;
+        let isPlaying = false;
+
+        // 创建一个简单的音乐合成器
+        function createMusicSynthesizer() {
+            if (audioContext) return; // 已经创建过了
+
+            try {
+                // 创建音频上下文
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // 创建音量控制
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.3; // 设置音量
+                gainNode.connect(audioContext.destination);
+
+                // 显示音乐已开启
+                document.getElementById('music-btn').innerHTML = '<i class="fas fa-volume-up"></i>';
+                isPlaying = true;
+
+                // 播放音乐序列
+                playMusicSequence();
+            } catch (e) {
+                console.error('Web Audio API不受支持:', e);
+                alert('您的浏览器不支持Web Audio API，无法播放音乐');
+            }
+        }
+
+        // 播放一个音符
+        function playNote(frequency, duration, startTime, type = 'sine') {
+            const osc = audioContext.createOscillator();
+            const noteGain = audioContext.createGain();
+
+            // 设置音符类型和频率
+            osc.type = type;
+            osc.frequency.value = frequency;
+
+            // 连接节点
+            osc.connect(noteGain);
+            noteGain.connect(gainNode);
+
+            // 设置音量包络
+            noteGain.gain.setValueAtTime(0, startTime);
+            noteGain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+            noteGain.gain.linearRampToValueAtTime(0.2, startTime + duration - 0.05);
+            noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+            // 开始和停止
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+
+            return osc;
+        }
+
+        // 播放一个浪漫的音乐序列
+        function playMusicSequence() {
+            if (!audioContext || !isPlaying) return;
+
+            const now = audioContext.currentTime;
+            let time = now;
+
+            // 定义一个简单的旋律 - C大调
+            const melody = [
+                {note: 261.63, duration: 0.5}, // C4
+                {note: 293.66, duration: 0.5}, // D4
+                {note: 329.63, duration: 0.5}, // E4
+                {note: 349.23, duration: 1.0}, // F4
+                {note: 329.63, duration: 0.5}, // E4
+                {note: 349.23, duration: 0.5}, // F4
+                {note: 392.00, duration: 1.0}, // G4
+                {note: 349.23, duration: 0.5}, // F4
+                {note: 329.63, duration: 0.5}, // E4
+                {note: 293.66, duration: 0.5}, // D4
+                {note: 261.63, duration: 1.0}, // C4
+                {note: 392.00, duration: 0.5}, // G4
+                {note: 440.00, duration: 0.5}, // A4
+                {note: 392.00, duration: 0.5}, // G4
+                {note: 349.23, duration: 1.0}, // F4
+                {note: 329.63, duration: 0.5}, // E4
+                {note: 349.23, duration: 0.5}, // F4
+                {note: 261.63, duration: 1.5}  // C4
+            ];
+
+            // 播放旋律
+            melody.forEach(note => {
+                playNote(note.note, note.duration, time, 'sine');
+                // 同时播放和弦
+                if (Math.random() > 0.5) {
+                    playNote(note.note * 1.5, note.duration, time, 'triangle');
+                }
+                time += note.duration;
+            });
+
+            // 循环播放
+            setTimeout(() => {
+                if (isPlaying) {
+                    playMusicSequence();
+                }
+            }, (time - now) * 1000);
+        }
+
+        // 停止音乐
+        function stopMusic() {
+            isPlaying = false;
+
+            // 如果存在音频上下文，关闭它
+            if (gainNode) {
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+            }
+
+            document.getElementById('music-btn').innerHTML = '<i class="fas fa-volume-mute"></i>';
+        }
+
+        // 音乐按钮点击事件
+        document.getElementById('music-btn').addEventListener('click', function() {
+            if (!isPlaying) {
+                if (!audioContext) {
+                    createMusicSynthesizer();
+                } else {
+                    // 恢复播放
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    gainNode.gain.value = 0.3;
+                    isPlaying = true;
+                    this.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    playMusicSequence();
+                }
+            } else {
+                stopMusic();
+            }
+        });
+
+        // 窗口大小调整时重设画布尺寸
+        window.addEventListener('resize', () => {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+            heartCanvas.width = window.innerWidth;
+            heartCanvas.height = window.innerHeight;
+
+            // 重新计算矩阵列数
+            const newColumns = matrixCanvas.width / fontSize;
+            if (newColumns > columns) {
+                for (let i = drops.length; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * matrixCanvas.height / fontSize) - 100;
+                }
+            }
+
+            // 重新创建装饰图标
+            createDecorativeIcons();
+        });
+    </script>
+</body>
+</html>
