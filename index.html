@@ -12,17 +12,190 @@
     <!-- 添加Google Fonts优雅字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Ma+Shan+Zheng&family=Pacifico&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Ma+Shan+Zheng&family=Pacifico&family=ZCOOL+XiaoWei&family=Satisfy&family=Great+Vibes&display=swap" rel="stylesheet">
     <!-- 添加Font Awesome图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background: #000;
             font-family: 'ZCOOL XiaoWei', 'Ma Shan Zheng', sans-serif;
             color: #fff;
+            cursor: crosshair;
+        }
+
+        /* 加载动画 */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 1s ease-out;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-heart {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            animation: heartbeat 1.2s infinite;
+        }
+
+        .loader-heart:before,
+        .loader-heart:after {
+            content: '';
+            width: 60px;
+            height: 90px;
+            position: absolute;
+            left: 50px;
+            top: 0;
+            background: #fff;
+            border-radius: 50px 50px 0 0;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .loader-heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        .loader-text {
+            margin-top: 30px;
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Great Vibes', cursive;
+            letter-spacing: 2px;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(0.75); }
+            20% { transform: scale(1); }
+            40% { transform: scale(0.75); }
+            60% { transform: scale(1); }
+            80% { transform: scale(0.75); }
+            100% { transform: scale(0.75); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 动态背景 */
+        .dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .dynamic-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 255, 0.1) 1px, 
+                transparent 1px),
+                radial-gradient(circle, 
+                rgba(255, 255, 255, 0.05) 2px, 
+                transparent 2px);
+            background-size: 50px 50px, 100px 100px;
+            animation: bgMove 60s linear infinite;
+        }
+
+        @keyframes bgMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
+        }
+
+        /* 星空背景 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 4s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 流星效果 */
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, white, transparent);
+            transform: translateX(-100px);
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(-100px) translateY(0) rotate(-45deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px)) translateY(100vh) rotate(-45deg);
+                opacity: 0;
+            }
         }
 
         .container {
@@ -33,23 +206,79 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            z-index: 2;
         }
 
         #matrix-canvas {
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1;
+            z-index: 3;
+            opacity: 0.3;
         }
 
         #heart-canvas {
             position: absolute;
-            z-index: 2;
+            z-index: 4;
+        }
+
+        /* 鼠标轨迹效果 */
+        .mouse-trail {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .trail-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, rgba(255, 157, 226, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: fadeOut 1s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 点击爆炸效果 */
+        .click-explosion {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9997;
+        }
+
+        .explosion-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #ff9de2;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1);
+                opacity: 0;
+            }
         }
 
         .love-text {
             position: absolute;
-            z-index: 3;
+            z-index: 5;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -59,24 +288,93 @@
 
         .name {
             color: #ff9de2;
-            font-size: 4rem;
+            font-size: clamp(3rem, 8vw, 5rem);
             font-weight: bold;
-            font-family: 'Dancing Script', 'Ma Shan Zheng', cursive;
-            text-shadow: 0 0 10px rgba(255, 157, 226, 0.7), 0 0 20px rgba(255, 157, 226, 0.5);
+            font-family: 'Great Vibes', 'Dancing Script', cursive;
+            text-shadow: 
+                0 0 20px rgba(255, 157, 226, 0.8),
+                0 0 40px rgba(255, 157, 226, 0.6),
+                0 0 60px rgba(255, 157, 226, 0.4),
+                0 0 80px rgba(255, 157, 226, 0.2);
             opacity: 0;
-            animation: fadeIn 3s ease-in-out 2s forwards, glowing 1.5s ease-in-out infinite alternate;
-            letter-spacing: 2px;
+            animation: fadeInScale 3s ease-in-out 2s forwards, 
+                       glowing 2s ease-in-out infinite alternate,
+                       float 6s ease-in-out infinite;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .name::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            color: transparent;
+            background: linear-gradient(90deg, 
+                #ff9de2 0%, 
+                #ffd4f0 25%, 
+                #ff9de2 50%, 
+                #ffd4f0 75%, 
+                #ff9de2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes fadeInScale {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.5) translateY(20px);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0);
+            }
         }
 
         .message {
             color: #ffffff;
-            font-size: 1.5rem;
-            margin-top: 15px;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-top: 20px;
             opacity: 0;
             max-width: 80vw;
-            animation: fadeIn 3s ease-in-out 3s forwards, float 6s ease-in-out infinite;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-            letter-spacing: 1px;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+            font-family: 'Satisfy', 'Ma Shan Zheng', cursive;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message.typing {
+            animation: fadeIn 1s ease-in-out 3.5s forwards;
+        }
+
+        .message .text {
+            display: inline-block;
+            opacity: 0;
+            animation: typewriter 0.1s ease-in-out forwards;
+            animation-delay: calc(3.5s + var(--char-index) * 0.05s);
+        }
+
+        @keyframes typewriter {
+            0% { 
+                opacity: 0;
+                transform: translateY(10px) rotateX(90deg);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
         }
 
         /* 添加装饰图标样式 */
@@ -90,48 +388,97 @@
 
         .icon {
             position: absolute;
-            color: rgba(255, 255, 255, 0.6);
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgba(255, 157, 226, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             animation: float 6s ease-in-out infinite, spin 10s linear infinite;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
         }
 
         /* 控制面板样式 */
         .control-panel {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 30px;
+            right: 30px;
             z-index: 10;
             display: flex;
             gap: 15px;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            padding: 10px 15px;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            opacity: 0.3;
-            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 60px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .control-panel:hover {
             opacity: 1;
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .control-btn {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            transition: all 0.5s ease-out;
+            transform: translate(-50%, -50%);
+        }
+
+        .control-btn:hover::before {
+            width: 100px;
+            height: 100px;
         }
 
         .control-btn:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 5px 20px rgba(255, 157, 226, 0.4);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn i {
+            position: relative;
+            z-index: 1;
+            font-size: 18px;
+        }
+
+        /* 主题切换效果 */
+        .theme-transition {
+            animation: themeChange 0.5s ease-out;
+        }
+
+        @keyframes themeChange {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
         }
 
         @keyframes fadeIn {
@@ -140,14 +487,25 @@
         }
 
         @keyframes glowing {
-            from { text-shadow: 0 0 10px rgba(255, 157, 226, 0.7), 0 0 20px rgba(255, 157, 226, 0.4); }
-            to { text-shadow: 0 0 15px rgba(255, 157, 226, 1), 0 0 30px rgba(255, 157, 226, 0.8), 0 0 45px rgba(255, 157, 226, 0.6); }
+            from { 
+                text-shadow: 
+                    0 0 20px rgba(255, 157, 226, 0.8),
+                    0 0 40px rgba(255, 157, 226, 0.6);
+                filter: brightness(1);
+            }
+            to { 
+                text-shadow: 
+                    0 0 30px rgba(255, 157, 226, 1),
+                    0 0 60px rgba(255, 157, 226, 0.8),
+                    0 0 90px rgba(255, 157, 226, 0.6);
+                filter: brightness(1.1);
+            }
         }
 
         @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(1deg); }
+            75% { transform: translateY(5px) rotate(-1deg); }
         }
 
         @keyframes spin {
@@ -155,41 +513,299 @@
             to { transform: rotate(360deg); }
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
+        /* 提示框样式 */
+        .tooltip {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .control-btn:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .control-panel {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 15px;
+            }
+
+            .control-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .control-btn i {
+                font-size: 16px;
+            }
+
+            .name {
+                font-size: 3rem;
+            }
+
+            .message {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* 粒子光环效果 */
+        .particle-ring {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255, 157, 226, 0.3);
+            border-radius: 50%;
+            animation: rotateRing 20s linear infinite;
+            box-shadow: 
+                0 0 50px rgba(255, 157, 226, 0.3),
+                inset 0 0 50px rgba(255, 157, 226, 0.1);
+        }
+
+        @keyframes rotateRing {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* 音乐可视化效果 */
+        .music-visualizer {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3px;
+            z-index: 6;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .music-visualizer.active {
+            opacity: 0.6;
+        }
+
+        .music-bar {
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(to top, #ff9de2, #ffd4f0);
+            animation: musicWave 1s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+
+        @keyframes musicWave {
+            0%, 100% { height: 20px; }
+            50% { height: calc(20px + random() * 30px); }
         }
     </style>
 </head>
 <body>
+    <!-- 加载动画 -->
+    <div class="loader" id="loader">
+        <div class="loader-heart"></div>
+        <div class="loader-text">Loading Love...</div>
+    </div>
+
+    <!-- 动态背景 -->
+    <div class="dynamic-bg"></div>
+    
+    <!-- 星空背景 -->
+    <div class="stars" id="stars"></div>
+
+    <!-- 鼠标轨迹容器 -->
+    <div class="mouse-trail" id="mouseTrail"></div>
+
+    <!-- 点击爆炸效果容器 -->
+    <div class="click-explosion" id="clickExplosion"></div>
+
     <div class="container">
         <canvas id="matrix-canvas"></canvas>
         <canvas id="heart-canvas"></canvas>
+
+        <!-- 粒子光环 -->
+        <div class="particle-ring"></div>
 
         <!-- 添加装饰图标 -->
         <div class="decorative-icons" id="decorative-icons"></div>
 
         <div class="love-text">
-            <div class="name">TA</div>
-            <div class="message">心与心的距离，从不以时间计算</div>
+            <div class="name" data-text="TA">TA</div>
+            <div class="message typing" id="message"></div>
+        </div>
+
+        <!-- 音乐可视化 -->
+        <div class="music-visualizer" id="musicVisualizer">
+            <div class="music-bar" style="--i: 0"></div>
+            <div class="music-bar" style="--i: 1"></div>
+            <div class="music-bar" style="--i: 2"></div>
+            <div class="music-bar" style="--i: 3"></div>
+            <div class="music-bar" style="--i: 4"></div>
+            <div class="music-bar" style="--i: 5"></div>
+            <div class="music-bar" style="--i: 6"></div>
+            <div class="music-bar" style="--i: 7"></div>
         </div>
 
         <!-- 添加控制面板 -->
         <div class="control-panel">
-            <div class="control-btn" id="color-btn" title="更换颜色">
+            <div class="control-btn" id="color-btn">
                 <i class="fas fa-palette"></i>
+                <div class="tooltip">更换颜色主题</div>
             </div>
-            <div class="control-btn" id="music-btn" title="背景音乐">
+            <div class="control-btn" id="music-btn">
                 <i class="fas fa-music"></i>
+                <div class="tooltip">背景音乐</div>
             </div>
-            <div class="control-btn" id="fullscreen-btn" title="全屏显示">
+            <div class="control-btn" id="effect-btn">
+                <i class="fas fa-magic"></i>
+                <div class="tooltip">特效开关</div>
+            </div>
+            <div class="control-btn" id="message-btn">
+                <i class="fas fa-envelope-heart"></i>
+                <div class="tooltip">更换留言</div>
+            </div>
+            <div class="control-btn" id="fullscreen-btn">
                 <i class="fas fa-expand"></i>
+                <div class="tooltip">全屏显示</div>
             </div>
         </div>
     </div>
 
     <script>
+        // 页面加载完成后隐藏加载动画
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                }, 1000);
+            }, 1500);
+        });
+
+        // 创建星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+
+            // 创建流星
+            for (let i = 0; i < 5; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.top = Math.random() * 50 + '%';
+                shootingStar.style.left = '-100px';
+                shootingStar.style.animationDelay = Math.random() * 10 + 's';
+                shootingStar.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(shootingStar);
+            }
+        }
+
+        createStars();
+
+        // 鼠标轨迹效果
+        let mouseTrailEnabled = true;
+        document.addEventListener('mousemove', (e) => {
+            if (!mouseTrailEnabled) return;
+
+            const trail = document.createElement('div');
+            trail.className = 'trail-particle';
+            trail.style.left = e.pageX + 'px';
+            trail.style.top = e.pageY + 'px';
+            
+            document.getElementById('mouseTrail').appendChild(trail);
+            
+            setTimeout(() => {
+                trail.remove();
+            }, 1000);
+        });
+
+        // 点击爆炸效果
+        document.addEventListener('click', (e) => {
+            // 避免控制按钮触发爆炸效果
+            if (e.target.closest('.control-panel')) return;
+
+            const colors = ['#ff9de2', '#ffd4f0', '#ff85d5', '#ffb8e0', '#ff5cb8'];
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'explosion-particle';
+                
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const velocity = Math.random() * 100 + 50;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.left = e.pageX + 'px';
+                particle.style.top = e.pageY + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                document.getElementById('clickExplosion').appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        });
+
+        // 打字机效果
+        const messageElement = document.getElementById('message');
+        const messages = [
+            "心与心的距离，从不以时间计算",
+            "你是我生命中最美的相遇",
+            "愿时光不老，我们不散",
+            "每一个瞬间，都因你而精彩",
+            "守护这份美好，直到永远"
+        ];
+        let currentMessageIndex = 0;
+
+        function typewriterEffect(text) {
+            messageElement.innerHTML = '';
+            text.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.className = 'text';
+                span.style.setProperty('--char-index', index);
+                span.textContent = char;
+                messageElement.appendChild(span);
+            });
+        }
+
+        // 初始化打字机效果
+        typewriterEffect(messages[currentMessageIndex]);
+
         // 注册Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -203,7 +819,7 @@
             });
         }
         
-        // 矩阵数字雨效果
+        // 矩阵数字雨效果（优化版）
         const matrixCanvas = document.getElementById('matrix-canvas');
         const matrixCtx = matrixCanvas.getContext('2d');
 
@@ -212,8 +828,8 @@
         matrixCanvas.height = window.innerHeight;
 
         // 矩阵效果参数
-        const matrixChars = "TA我爱你❤💕💓💗💖";  // 增加更多爱心符号
-        const fontSize = 16;
+        const matrixChars = "TA我爱你❤💕💓💗💖♥♡LOVE";
+        const fontSize = 14;
         const columns = matrixCanvas.width / fontSize;
 
         // 创建降落的起始点
@@ -225,7 +841,7 @@
         // 绘制矩阵效果
         function drawMatrix() {
             // 设置半透明黑色背景，形成拖尾效果
-            matrixCtx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            matrixCtx.fillStyle = "rgba(0, 0, 0, 0.03)";
             matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
 
             // 循环遍历每一列
@@ -233,26 +849,28 @@
                 // 随机选择一个字符
                 const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
 
-                // 提升一些字符的亮度，使效果更生动，使用更丰富的颜色
-                if (Math.random() > 0.97) {
-                    matrixCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                } else if (Math.random() > 0.94) {
-                    matrixCtx.fillStyle = "rgba(255, 157, 226, 0.9)"; // 亮粉色
-                } else if (Math.random() > 0.9) {
-                    matrixCtx.fillStyle = "rgba(186, 104, 200, 0.8)"; // 紫色
-                } else if (Math.random() > 0.85) {
-                    matrixCtx.fillStyle = "rgba(111, 168, 220, 0.8)"; // 蓝色
+                // 创建渐变色彩效果
+                const gradient = matrixCtx.createLinearGradient(0, drops[i] * fontSize - fontSize, 0, drops[i] * fontSize);
+                
+                if (Math.random() > 0.98) {
+                    gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+                    gradient.addColorStop(0.5, "rgba(255, 255, 255, 1)");
+                    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+                } else if (Math.random() > 0.95) {
+                    gradient.addColorStop(0, "rgba(255, 157, 226, 0)");
+                    gradient.addColorStop(0.5, "rgba(255, 157, 226, 1)");
+                    gradient.addColorStop(1, "rgba(255, 157, 226, 0)");
                 } else {
-                    matrixCtx.fillStyle = "rgba(255, 157, 226, 0.4)";
+                    gradient.addColorStop(0, "rgba(255, 157, 226, 0)");
+                    gradient.addColorStop(1, "rgba(255, 157, 226, 0.5)");
                 }
 
-                matrixCtx.font = fontSize + "px arial";
-
-                // 在指定位置绘制字符
+                matrixCtx.fillStyle = gradient;
+                matrixCtx.font = fontSize + "px monospace";
                 matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
 
                 // 如果达到底部或随机条件，重置到顶部
-                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.98) {
                     drops[i] = 0;
                 }
 
@@ -262,9 +880,9 @@
         }
 
         // 定期更新矩阵效果
-        setInterval(drawMatrix, 50);
+        setInterval(drawMatrix, 35);
 
-        // 心形粒子效果
+        // 心形粒子效果（增强版）
         const heartCanvas = document.getElementById('heart-canvas');
         const heartCtx = heartCanvas.getContext('2d');
 
@@ -272,154 +890,166 @@
         heartCanvas.height = window.innerHeight;
 
         // 粒子参数设置
-        const particleCount = 2500;  // 增加粒子数量，使心形更密集
-        const particleSize = 3.5;    // 略微增大粒子
-        const particleColor = "#ff9de2"; // 更亮的粉色爱心
-        // 定义多种粒子颜色，创建渐变效果
+        const particleCount = 3000;
+        const particleSize = 4;
         const particleColors = [
-            "#ff9de2", // 粉色
-            "#ff85d5", // 深粉色
-            "#ffd4f0", // 浅粉色
-            "#ff5cb8", // 亮粉色
-            "#ffb8e0"  // 中粉色
+            "#ff9de2",
+            "#ff85d5",
+            "#ffd4f0",
+            "#ff5cb8",
+            "#ffb8e0"
         ];
-        const heartSize = 11;        // 略微增大心形
-        const pulseFactor = 0.09;    // 增加脉动幅度
-        const flowSpeed = 0.85;      // 略微增加流动速度
+        const heartSize = 12;
+        const pulseFactor = 0.1;
+        const flowSpeed = 1;
 
-        // 粒子类
+        // 粒子类（增强版）
         class Particle {
             constructor() {
                 this.reset();
             }
 
-            // 重置粒子位置与属性
             reset() {
-                // 随机角度
                 this.angle = Math.random() * Math.PI * 2;
-                // 随机距离
                 this.radius = Math.random() * heartSize;
-                // 初始位置
                 this.x = 0;
                 this.y = 0;
-                // 添加一些随机性，使粒子出现在心形周围
                 this.vx = Math.random() * 2 - 1;
                 this.vy = Math.random() * 2 - 1;
-                // 粒子大小
                 this.size = Math.random() * particleSize + 1;
-                // 透明度
                 this.alpha = Math.random() * 0.6 + 0.4;
-                // 粒子生命周期
                 this.life = Math.random() * 100 + 100;
                 this.maxLife = this.life;
-                // 粒子类型 - 引入更多类型增加多样性
-                if (Math.random() > 0.97) {
-                    this.type = 'sparkle'; // 闪烁粒子
-                } else if (Math.random() > 0.9) {
-                    this.type = 'special'; // 特殊粒子
+                
+                // 更多粒子类型
+                const rand = Math.random();
+                if (rand > 0.98) {
+                    this.type = 'star';     // 星形粒子
+                } else if (rand > 0.96) {
+                    this.type = 'sparkle';  // 闪烁粒子
+                } else if (rand > 0.93) {
+                    this.type = 'special';  // 特殊粒子
+                } else if (rand > 0.90) {
+                    this.type = 'glow';     // 发光粒子
                 } else {
-                    this.type = 'normal';  // 普通粒子
+                    this.type = 'normal';   // 普通粒子
                 }
 
-                // 随机选择粒子颜色
                 this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
             }
 
-            // 更新粒子状态
             update(time) {
-                // 使粒子围绕心形移动
                 this.angle += flowSpeed * 0.01;
 
-                // 心形方程，产生心形轨迹
-                // x = 16 * sin(t)^3
-                // y = 13 * cos(t) - 5 * cos(2t) - 2 * cos(3t) - cos(4t)
+                // 心形方程
                 const heartX = 16 * Math.pow(Math.sin(this.angle), 3);
                 const heartY = -(13 * Math.cos(this.angle) - 5 * Math.cos(2 * this.angle) - 2 * Math.cos(3 * this.angle) - Math.cos(4 * this.angle));
 
-                // 计算目标位置，添加脉动效果
+                // 脉动效果
                 const pulse = 1 + Math.sin(time * pulseFactor) * 0.2;
                 const targetX = heartX * this.radius * pulse;
                 const targetY = heartY * this.radius * pulse;
 
-                // 平滑移动到目标位置
+                // 平滑移动
                 this.x += (targetX - this.x) * 0.1;
                 this.y += (targetY - this.y) * 0.1;
 
-                // 减少生命值
                 this.life--;
 
                 // 特殊粒子行为
-                if (this.type === 'special') {
-                    this.alpha = 0.4 + Math.abs(Math.sin(time * 0.2 + this.angle)) * 0.6;
-                    this.size = Math.random() * particleSize * 1.5 + 1.5;
-                } else if (this.type === 'sparkle') {
-                    // 闪烁粒子有更强的闪烁效果
-                    this.alpha = 0.2 + Math.abs(Math.sin(time * 0.4 + this.angle)) * 0.8;
-                    this.size = Math.random() * particleSize * 2 + 2;
+                switch(this.type) {
+                    case 'star':
+                        this.alpha = 0.6 + Math.abs(Math.sin(time * 0.5 + this.angle)) * 0.4;
+                        this.size = Math.random() * particleSize * 2 + 2;
+                        break;
+                    case 'sparkle':
+                        this.alpha = 0.2 + Math.abs(Math.sin(time * 0.4 + this.angle)) * 0.8;
+                        this.size = Math.random() * particleSize * 2.5 + 2.5;
+                        break;
+                    case 'special':
+                        this.alpha = 0.4 + Math.abs(Math.sin(time * 0.2 + this.angle)) * 0.6;
+                        this.size = Math.random() * particleSize * 1.5 + 1.5;
+                        break;
+                    case 'glow':
+                        this.alpha = 0.5 + Math.abs(Math.sin(time * 0.3 + this.angle)) * 0.5;
+                        this.size = Math.random() * particleSize * 1.8 + 1.8;
+                        break;
                 }
 
-                // 当生命结束时重置粒子
                 if (this.life <= 0) {
                     this.reset();
                 }
             }
 
-            // 绘制粒子
             draw(ctx) {
-                // 随着生命周期变化透明度
                 const alphaFade = this.life / this.maxLife;
+                let color = this.color;
 
-                // 设置填充样式
-                let color = this.color || particleColor;
-
-                if (this.type === 'special') {
-                    // 特殊粒子颜色 - 偏白色或更亮的粉色
-                    color = Math.random() > 0.5 ? "#ffb6c1" : "#ffffff";
-                } else if (this.type === 'sparkle') {
-                    // 闪烁粒子 - 使用白色或金色
-                    color = Math.random() > 0.5 ? "#ffffff" : "#ffd700";
+                // 根据粒子类型设置颜色
+                switch(this.type) {
+                    case 'star':
+                        color = "#ffd700";  // 金色
+                        this.drawStar(ctx, this.x, this.y, this.size, alphaFade);
+                        return;
+                    case 'sparkle':
+                        color = "#ffffff";  // 白色
+                        break;
+                    case 'glow':
+                        color = "#ffb6c1";  // 浅粉色
+                        break;
                 }
 
                 ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade})`;
-
-                // 开始绘制粒子
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 对特殊粒子添加发光效果
-                if ((this.type === 'special' || this.type === 'sparkle') && this.alpha > 0.6) {
-                    // 添加更强的发光效果
-                    const glowSize = this.type === 'sparkle' ? 2.5 : 1.8;
-                    const glowOpacity = this.type === 'sparkle' ? 0.5 : 0.3;
+                // 发光效果
+                if (this.type !== 'normal' && this.alpha > 0.6) {
+                    const glowSize = this.type === 'sparkle' ? 3 : 2;
+                    const glowOpacity = this.type === 'sparkle' ? 0.4 : 0.2;
 
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size * glowSize, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade * glowOpacity})`;
                     ctx.fill();
-
-                    // 为闪烁粒子添加第二层发光
-                    if (this.type === 'sparkle') {
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size * 3.5, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(${hexToRgb(color)}, ${this.alpha * alphaFade * 0.15})`;
-                        ctx.fill();
-                    }
                 }
+            }
+
+            // 绘制星形
+            drawStar(ctx, x, y, size, alpha) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.fillStyle = `rgba(255, 215, 0, ${this.alpha * alpha})`;
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                    const innerAngle = angle + Math.PI / 5;
+                    const outerX = Math.cos(angle) * size;
+                    const outerY = Math.sin(angle) * size;
+                    const innerX = Math.cos(innerAngle) * size * 0.5;
+                    const innerY = Math.sin(innerAngle) * size * 0.5;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(outerX, outerY);
+                    } else {
+                        ctx.lineTo(outerX, outerY);
+                    }
+                    ctx.lineTo(innerX, innerY);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
             }
         }
 
         // 辅助函数：将十六进制颜色转换为RGB
         function hexToRgb(hex) {
-            // 移除#号
             hex = hex.replace('#', '');
-
-            // 解析RGB值
             const bigint = parseInt(hex, 16);
             const r = (bigint >> 16) & 255;
             const g = (bigint >> 8) & 255;
             const b = bigint & 255;
-
             return `${r}, ${g}, ${b}`;
         }
 
@@ -429,108 +1059,151 @@
             particles.push(new Particle());
         }
 
-        // 动画时间
         let time = 0;
 
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
 
-            // 清除画布
             heartCtx.clearRect(0, 0, heartCanvas.width, heartCanvas.height);
 
-            // 移动画布中心到屏幕中心
             heartCtx.save();
             heartCtx.translate(heartCanvas.width / 2, heartCanvas.height / 2);
 
-            // 更新并绘制所有粒子
+            // 绘制粒子
             for (const particle of particles) {
                 particle.update(time);
                 particle.draw(heartCtx);
             }
 
-            // 可选：绘制发光边缘
-            drawGlowingEdge();
+            // 绘制多层发光边缘
+            drawMultiLayerGlow();
 
             heartCtx.restore();
 
-            // 增加时间
             time += 0.1;
         }
 
-        // 绘制发光边缘
-        function drawGlowingEdge() {
-            const maxRadius = heartSize * 18; // 增大最大半径
-            const glowGradient = heartCtx.createRadialGradient(0, 0, maxRadius * 0.6, 0, 0, maxRadius);
+        // 绘制多层发光边缘
+        function drawMultiLayerGlow() {
+            const maxRadius = heartSize * 20;
+            
+            // 外层光晕
+            const outerGlow = heartCtx.createRadialGradient(0, 0, maxRadius * 0.5, 0, 0, maxRadius);
+            outerGlow.addColorStop(0, `rgba(${hexToRgb(particleColors[0])}, 0.2)`);
+            outerGlow.addColorStop(0.3, `rgba(${hexToRgb(particleColors[1])}, 0.15)`);
+            outerGlow.addColorStop(0.6, `rgba(${hexToRgb(particleColors[2])}, 0.08)`);
+            outerGlow.addColorStop(0.9, `rgba(${hexToRgb(particleColors[3])}, 0.03)`);
+            outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-            // 创建更丰富的渐变
-            glowGradient.addColorStop(0, `rgba(${hexToRgb(particleColors[0])}, 0.15)`);
-            glowGradient.addColorStop(0.5, `rgba(${hexToRgb(particleColors[2])}, 0.08)`);
-            glowGradient.addColorStop(0.8, `rgba(${hexToRgb(particleColors[4])}, 0.04)`);
-            glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-            heartCtx.fillStyle = glowGradient;
+            heartCtx.fillStyle = outerGlow;
             heartCtx.beginPath();
             heartCtx.arc(0, 0, maxRadius, 0, Math.PI * 2);
+            heartCtx.fill();
+
+            // 内层光晕
+            const innerGlow = heartCtx.createRadialGradient(0, 0, maxRadius * 0.2, 0, 0, maxRadius * 0.6);
+            innerGlow.addColorStop(0, `rgba(255, 255, 255, 0.1)`);
+            innerGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            heartCtx.fillStyle = innerGlow;
+            heartCtx.beginPath();
+            heartCtx.arc(0, 0, maxRadius * 0.6, 0, Math.PI * 2);
             heartCtx.fill();
         }
 
         // 开始动画
         animate();
 
-        // 创建装饰图标
+        // 创建装饰图标（增强版）
         function createDecorativeIcons() {
             const iconsContainer = document.getElementById('decorative-icons');
-            iconsContainer.innerHTML = ''; // 清空现有图标
+            iconsContainer.innerHTML = '';
 
-            // 定义可用的图标
             const icons = [
                 'fa-heart', 'fa-star', 'fa-music', 'fa-moon', 'fa-sun',
-                'fa-dove', 'fa-snowflake', 'fa-sparkles', 'fa-heart-pulse'
+                'fa-dove', 'fa-snowflake', 'fa-sparkles', 'fa-heart-pulse',
+                'fa-infinity', 'fa-gem', 'fa-crown'
             ];
 
-            // 创建20个随机图标
-            for (let i = 0; i < 20; i++) {
+            // 创建25个随机图标
+            for (let i = 0; i < 25; i++) {
                 const icon = document.createElement('i');
                 const randomIcon = icons[Math.floor(Math.random() * icons.length)];
 
                 icon.className = `icon fas ${randomIcon}`;
-                icon.style.fontSize = `${Math.random() * 15 + 10}px`;
+                icon.style.fontSize = `${Math.random() * 20 + 10}px`;
                 icon.style.left = `${Math.random() * 100}%`;
                 icon.style.top = `${Math.random() * 100}%`;
-                icon.style.opacity = `${Math.random() * 0.5 + 0.2}`;
-
-                // 随机动画延迟和持续时间
+                icon.style.opacity = `${Math.random() * 0.4 + 0.1}`;
                 icon.style.animationDelay = `${Math.random() * 5}s`;
-                icon.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                icon.style.animationDuration = `${Math.random() * 15 + 10}s`;
 
                 iconsContainer.appendChild(icon);
             }
         }
 
-        // 创建装饰图标
         createDecorativeIcons();
+
+        // 颜色主题
+        const themes = [
+            { primary: '#ff9de2', secondary: '#ffd4f0', accent: '#ff5cb8' },
+            { primary: '#87ceeb', secondary: '#b0e0e6', accent: '#4682b4' },
+            { primary: '#dda0dd', secondary: '#e6e6fa', accent: '#9370db' },
+            { primary: '#ffb6c1', secondary: '#ffc0cb', accent: '#ff69b4' },
+            { primary: '#98fb98', secondary: '#90ee90', accent: '#00fa9a' }
+        ];
+        let currentThemeIndex = 0;
 
         // 控制面板功能
         document.getElementById('color-btn').addEventListener('click', function() {
-            // 随机生成新的颜色方案
-            const hue = Math.floor(Math.random() * 360);
-            const newColors = [
-                `hsl(${hue}, 100%, 80%)`,
-                `hsl(${hue}, 90%, 70%)`,
-                `hsl(${hue}, 80%, 85%)`,
-                `hsl(${hue}, 100%, 65%)`,
-                `hsl(${hue}, 85%, 75%)`
-            ];
-
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            const theme = themes[currentThemeIndex];
+            
+            // 添加过渡效果
+            document.body.classList.add('theme-transition');
+            
             // 更新粒子颜色
-            for (let i = 0; i < particleColors.length; i++) {
-                particleColors[i] = newColors[i];
-            }
+            particleColors[0] = theme.primary;
+            particleColors[1] = theme.secondary;
+            particleColors[2] = theme.accent;
+            
+            // 更新文字颜色
+            document.querySelector('.name').style.color = theme.primary;
+            document.querySelector('.name').style.textShadow = `
+                0 0 20px ${theme.primary}80,
+                0 0 40px ${theme.primary}60,
+                0 0 60px ${theme.primary}40`;
+            
+            // 更新动态背景
+            document.querySelector('.dynamic-bg').style.background = 
+                `linear-gradient(135deg, ${theme.primary}40, ${theme.accent}40)`;
+            
+            setTimeout(() => {
+                document.body.classList.remove('theme-transition');
+            }, 500);
+        });
 
-            // 更新名称颜色
-            document.querySelector('.name').style.color = newColors[0];
-            document.querySelector('.name').style.textShadow = `0 0 10px ${newColors[0]}80, 0 0 20px ${newColors[0]}50`;
+        // 特效开关
+        let effectsEnabled = true;
+        document.getElementById('effect-btn').addEventListener('click', function() {
+            effectsEnabled = !effectsEnabled;
+            mouseTrailEnabled = effectsEnabled;
+            
+            document.getElementById('decorative-icons').style.display = 
+                effectsEnabled ? 'block' : 'none';
+            document.querySelector('.particle-ring').style.display = 
+                effectsEnabled ? 'block' : 'none';
+            
+            this.innerHTML = effectsEnabled ? 
+                '<i class="fas fa-magic"></i>' : 
+                '<i class="fas fa-magic" style="opacity: 0.5"></i>';
+        });
+
+        // 更换留言
+        document.getElementById('message-btn').addEventListener('click', function() {
+            currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+            typewriterEffect(messages[currentMessageIndex]);
         });
 
         // 全屏功能
@@ -546,71 +1219,70 @@
             }
         });
 
-        // 音乐按钮功能 - 使用内置音频合成
+        // 音乐功能（增强版）
         let audioContext = null;
         let oscillator = null;
         let gainNode = null;
         let isPlaying = false;
 
-        // 创建一个简单的音乐合成器
         function createMusicSynthesizer() {
-            if (audioContext) return; // 已经创建过了
+            if (audioContext) return;
 
             try {
-                // 创建音频上下文
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-                // 创建音量控制
                 gainNode = audioContext.createGain();
-                gainNode.gain.value = 0.3; // 设置音量
+                gainNode.gain.value = 0.3;
                 gainNode.connect(audioContext.destination);
 
-                // 显示音乐已开启
                 document.getElementById('music-btn').innerHTML = '<i class="fas fa-volume-up"></i>';
+                document.getElementById('musicVisualizer').classList.add('active');
                 isPlaying = true;
 
-                // 播放音乐序列
                 playMusicSequence();
             } catch (e) {
                 console.error('Web Audio API不受支持:', e);
-                alert('您的浏览器不支持Web Audio API，无法播放音乐');
             }
         }
 
-        // 播放一个音符
         function playNote(frequency, duration, startTime, type = 'sine') {
             const osc = audioContext.createOscillator();
             const noteGain = audioContext.createGain();
 
-            // 设置音符类型和频率
             osc.type = type;
             osc.frequency.value = frequency;
 
-            // 连接节点
             osc.connect(noteGain);
             noteGain.connect(gainNode);
 
-            // 设置音量包络
             noteGain.gain.setValueAtTime(0, startTime);
             noteGain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
             noteGain.gain.linearRampToValueAtTime(0.2, startTime + duration - 0.05);
             noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
 
-            // 开始和停止
             osc.start(startTime);
             osc.stop(startTime + duration);
+
+            // 更新音乐可视化
+            updateMusicVisualizer();
 
             return osc;
         }
 
-        // 播放一个浪漫的音乐序列
+        function updateMusicVisualizer() {
+            const bars = document.querySelectorAll('.music-bar');
+            bars.forEach((bar, index) => {
+                const height = Math.random() * 30 + 20;
+                bar.style.height = `${height}px`;
+            });
+        }
+
         function playMusicSequence() {
             if (!audioContext || !isPlaying) return;
 
             const now = audioContext.currentTime;
             let time = now;
 
-            // 定义一个简单的旋律 - C大调
+            // 浪漫旋律
             const melody = [
                 {note: 261.63, duration: 0.5}, // C4
                 {note: 293.66, duration: 0.5}, // D4
@@ -623,26 +1295,16 @@
                 {note: 329.63, duration: 0.5}, // E4
                 {note: 293.66, duration: 0.5}, // D4
                 {note: 261.63, duration: 1.0}, // C4
-                {note: 392.00, duration: 0.5}, // G4
-                {note: 440.00, duration: 0.5}, // A4
-                {note: 392.00, duration: 0.5}, // G4
-                {note: 349.23, duration: 1.0}, // F4
-                {note: 329.63, duration: 0.5}, // E4
-                {note: 349.23, duration: 0.5}, // F4
-                {note: 261.63, duration: 1.5}  // C4
             ];
 
-            // 播放旋律
             melody.forEach(note => {
                 playNote(note.note, note.duration, time, 'sine');
-                // 同时播放和弦
                 if (Math.random() > 0.5) {
                     playNote(note.note * 1.5, note.duration, time, 'triangle');
                 }
                 time += note.duration;
             });
 
-            // 循环播放
             setTimeout(() => {
                 if (isPlaying) {
                     playMusicSequence();
@@ -650,31 +1312,29 @@
             }, (time - now) * 1000);
         }
 
-        // 停止音乐
         function stopMusic() {
             isPlaying = false;
 
-            // 如果存在音频上下文，关闭它
             if (gainNode) {
                 gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
             }
 
             document.getElementById('music-btn').innerHTML = '<i class="fas fa-volume-mute"></i>';
+            document.getElementById('musicVisualizer').classList.remove('active');
         }
 
-        // 音乐按钮点击事件
         document.getElementById('music-btn').addEventListener('click', function() {
             if (!isPlaying) {
                 if (!audioContext) {
                     createMusicSynthesizer();
                 } else {
-                    // 恢复播放
                     if (audioContext.state === 'suspended') {
                         audioContext.resume();
                     }
                     gainNode.gain.value = 0.3;
                     isPlaying = true;
                     this.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    document.getElementById('musicVisualizer').classList.add('active');
                     playMusicSequence();
                 }
             } else {
@@ -682,14 +1342,13 @@
             }
         });
 
-        // 窗口大小调整时重设画布尺寸
+        // 窗口大小调整
         window.addEventListener('resize', () => {
             matrixCanvas.width = window.innerWidth;
             matrixCanvas.height = window.innerHeight;
             heartCanvas.width = window.innerWidth;
             heartCanvas.height = window.innerHeight;
 
-            // 重新计算矩阵列数
             const newColumns = matrixCanvas.width / fontSize;
             if (newColumns > columns) {
                 for (let i = drops.length; i < newColumns; i++) {
@@ -697,7 +1356,6 @@
                 }
             }
 
-            // 重新创建装饰图标
             createDecorativeIcons();
         });
     </script>
