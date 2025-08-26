@@ -544,6 +544,79 @@
             opacity: 1;
         }
 
+        /* 音量控制组件样式 */
+        .control-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .volume-slider-container {
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 157, 226, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            min-width: 120px;
+            transition: all 0.3s ease;
+            transform: translateY(10px);
+            opacity: 0;
+        }
+
+        .volume-slider-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            margin: 5px 0;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9de2, #ff5cb8);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(255, 157, 226, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9de2, #ff5cb8);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(255, 157, 226, 0.4);
+        }
+
+        .volume-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .control-panel {
@@ -676,6 +749,17 @@
                 <i class="fas fa-music"></i>
                 <div class="tooltip">背景音乐</div>
             </div>
+            <!-- 音量控制滑块 -->
+            <div class="control-group">
+                <div class="control-btn" id="volume-btn">
+                    <i class="fas fa-volume-up"></i>
+                    <div class="tooltip">音量控制</div>
+                </div>
+                <div class="volume-slider-container" id="volume-slider-container" style="display: none;">
+                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="30">
+                    <div class="volume-label">音量: <span id="volume-value">30</span>%</div>
+                </div>
+            </div>
             <div class="control-btn" id="effect-btn">
                 <i class="fas fa-magic"></i>
                 <div class="tooltip">特效开关</div>
@@ -702,10 +786,96 @@
             }, 1500);
         });
 
-        // 创建星空背景
+        // 设备性能检测和动态配置
+        let devicePerformanceLevel = 'medium'; // 默认中等性能
+        let performanceConfig = {
+            high: {
+                particleCount: 3000,
+                starCount: 200,
+                trailParticleCount: 30,
+                maxTrailParticles: 50
+            },
+            medium: {
+                particleCount: 2000,
+                starCount: 150,
+                trailParticleCount: 20,
+                maxTrailParticles: 30
+            },
+            low: {
+                particleCount: 1000,
+                starCount: 100,
+                trailParticleCount: 10,
+                maxTrailParticles: 20
+            }
+        };
+
+        /**
+         * 检测设备性能等级
+         */
+        function detectDevicePerformance() {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            
+            let score = 0;
+            
+            // 检查硬件并发数
+            if (navigator.hardwareConcurrency) {
+                score += navigator.hardwareConcurrency * 2;
+            }
+            
+            // 检查内存信息（如果可用）
+            if (navigator.deviceMemory) {
+                score += navigator.deviceMemory * 3;
+            }
+            
+            // 检查WebGL支持
+            if (gl) {
+                score += 10;
+                const renderer = gl.getParameter(gl.RENDERER);
+                if (renderer && renderer.includes('Intel')) {
+                    score += 5;
+                } else if (renderer && (renderer.includes('NVIDIA') || renderer.includes('AMD'))) {
+                    score += 15;
+                }
+            }
+            
+            // 基于移动设备检测
+            const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+            if (isMobile) {
+                score *= 0.7; // 移动设备分数降低
+            }
+            
+            // 检查屏幕尺寸
+            const screenArea = window.screen.width * window.screen.height;
+            if (screenArea > 2073600) { // 1920x1080以上
+                score += 10;
+            } else if (screenArea < 921600) { // 1280x720以下
+                score -= 5;
+            }
+            
+            // 根据分数确定性能等级
+            if (score >= 35) {
+                devicePerformanceLevel = 'high';
+            } else if (score >= 20) {
+                devicePerformanceLevel = 'medium';
+            } else {
+                devicePerformanceLevel = 'low';
+            }
+            
+            console.log(`设备性能等级: ${devicePerformanceLevel} (得分: ${score})`);
+            return devicePerformanceLevel;
+        }
+
+        // 执行性能检测
+        detectDevicePerformance();
+
+        // 获取当前配置
+        const currentConfig = performanceConfig[devicePerformanceLevel];
+
+        // 创建星空背景 - 使用动态配置
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const starCount = 200;
+            const starCount = currentConfig.starCount;
 
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
@@ -733,21 +903,61 @@
 
         createStars();
 
-        // 鼠标轨迹效果
+        // 鼠标轨迹效果 - 优化版本，防止内存泄漏
         let mouseTrailEnabled = true;
-        document.addEventListener('mousemove', (e) => {
-            if (!mouseTrailEnabled) return;
-
+        const trailParticlePool = [];
+        const activeTrailParticles = new Set();
+        const MAX_TRAIL_PARTICLES = currentConfig.maxTrailParticles; // 根据性能动态调整
+        
+        /**
+         * 从对象池获取粒子元素，如果池中没有则创建新的
+         */
+        function getTrailParticle() {
+            if (trailParticlePool.length > 0) {
+                return trailParticlePool.pop();
+            }
+            
             const trail = document.createElement('div');
             trail.className = 'trail-particle';
+            return trail;
+        }
+        
+        /**
+         * 将粒子元素回收到对象池
+         */
+        function recycleTrailParticle(trail) {
+            if (trail.parentNode) {
+                trail.parentNode.removeChild(trail);
+            }
+            activeTrailParticles.delete(trail);
+            // 重置样式
+            trail.style.transform = '';
+            trail.style.opacity = '';
+            trailParticlePool.push(trail);
+        }
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!mouseTrailEnabled) return;
+            
+            // 如果活跃粒子数量超过限制，移除最老的粒子
+            if (activeTrailParticles.size >= MAX_TRAIL_PARTICLES) {
+                const oldestParticle = activeTrailParticles.values().next().value;
+                recycleTrailParticle(oldestParticle);
+            }
+
+            const trail = getTrailParticle();
             trail.style.left = e.pageX + 'px';
             trail.style.top = e.pageY + 'px';
             
-            document.getElementById('mouseTrail').appendChild(trail);
-            
-            setTimeout(() => {
-                trail.remove();
-            }, 1000);
+            const mouseTrailContainer = document.getElementById('mouseTrail');
+            if (mouseTrailContainer) {
+                mouseTrailContainer.appendChild(trail);
+                activeTrailParticles.add(trail);
+                
+                setTimeout(() => {
+                    recycleTrailParticle(trail);
+                }, 1000);
+            }
         });
 
         // 点击爆炸效果
@@ -756,7 +966,7 @@
             if (e.target.closest('.control-panel')) return;
 
             const colors = ['#ff9de2', '#ffd4f0', '#ff85d5', '#ffb8e0', '#ff5cb8'];
-            const particleCount = 30;
+            const particleCount = currentConfig.trailParticleCount;
 
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
@@ -879,8 +1089,26 @@
             }
         }
 
-        // 定期更新矩阵效果
-        setInterval(drawMatrix, 35);
+        // 帧率控制变量
+        let lastMatrixTime = 0;
+        const MATRIX_FPS = 30; // 目标帧率
+        const MATRIX_FRAME_TIME = 1000 / MATRIX_FPS;
+
+        /**
+         * 优化的矩阵动画循环，使用requestAnimationFrame
+         */
+        function matrixAnimationLoop(currentTime) {
+            // 控制帧率
+            if (currentTime - lastMatrixTime >= MATRIX_FRAME_TIME) {
+                drawMatrix();
+                lastMatrixTime = currentTime;
+            }
+            
+            requestAnimationFrame(matrixAnimationLoop);
+        }
+
+        // 启动矩阵动画循环
+        requestAnimationFrame(matrixAnimationLoop);
 
         // 心形粒子效果（增强版）
         const heartCanvas = document.getElementById('heart-canvas');
@@ -889,8 +1117,8 @@
         heartCanvas.width = window.innerWidth;
         heartCanvas.height = window.innerHeight;
 
-        // 粒子参数设置
-        const particleCount = 3000;
+        // 粒子参数设置 - 根据设备性能动态调整
+        const particleCount = currentConfig.particleCount;
         const particleSize = 4;
         const particleColors = [
             "#ff9de2",
@@ -1219,16 +1447,25 @@
             }
         });
 
-        // 音乐功能（增强版）
+        // 音乐功能（增强版） - 添加完整的资源管理
         let audioContext = null;
         let oscillator = null;
         let gainNode = null;
         let isPlaying = false;
+        let activeOscillators = new Set(); // 追踪所有活跃的振荡器
 
+        /**
+         * 创建音乐合成器，带有完整的错误处理和资源管理
+         */
         function createMusicSynthesizer() {
             if (audioContext) return;
 
             try {
+                // 检查浏览器兼容性
+                if (!window.AudioContext && !window.webkitAudioContext) {
+                    throw new Error('浏览器不支持Web Audio API');
+                }
+
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 gainNode = audioContext.createGain();
                 gainNode.gain.value = 0.3;
@@ -1240,32 +1477,84 @@
 
                 playMusicSequence();
             } catch (e) {
-                console.error('Web Audio API不受支持:', e);
+                console.error('Web Audio API不受支持或初始化失败:', e);
+                // 提供用户友好的错误反馈
+                const musicBtn = document.getElementById('music-btn');
+                if (musicBtn) {
+                    musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    musicBtn.style.opacity = '0.5';
+                    musicBtn.disabled = true;
+                }
+            }
+        }
+
+        /**
+         * 清理所有音频资源
+         */
+        function cleanupAudioResources() {
+            try {
+                // 停止所有活跃的振荡器
+                activeOscillators.forEach(osc => {
+                    try {
+                        osc.stop();
+                    } catch (e) {
+                        // 振荡器可能已经停止，忽略错误
+                    }
+                });
+                activeOscillators.clear();
+
+                // 关闭音频上下文
+                if (audioContext && audioContext.state !== 'closed') {
+                    audioContext.close();
+                }
+
+                // 重置所有变量
+                audioContext = null;
+                gainNode = null;
+                oscillator = null;
+                isPlaying = false;
+            } catch (e) {
+                console.error('清理音频资源时出错:', e);
             }
         }
 
         function playNote(frequency, duration, startTime, type = 'sine') {
-            const osc = audioContext.createOscillator();
-            const noteGain = audioContext.createGain();
+            if (!audioContext) return;
+            
+            try {
+                const osc = audioContext.createOscillator();
+                const noteGain = audioContext.createGain();
 
-            osc.type = type;
-            osc.frequency.value = frequency;
+                osc.type = type;
+                osc.frequency.value = frequency;
 
-            osc.connect(noteGain);
-            noteGain.connect(gainNode);
+                osc.connect(noteGain);
+                noteGain.connect(gainNode);
 
-            noteGain.gain.setValueAtTime(0, startTime);
-            noteGain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-            noteGain.gain.linearRampToValueAtTime(0.2, startTime + duration - 0.05);
-            noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
+                noteGain.gain.setValueAtTime(0, startTime);
+                noteGain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                noteGain.gain.linearRampToValueAtTime(0.2, startTime + duration - 0.05);
+                noteGain.gain.linearRampToValueAtTime(0, startTime + duration);
 
-            osc.start(startTime);
-            osc.stop(startTime + duration);
+                // 追踪活跃的振荡器
+                activeOscillators.add(osc);
 
-            // 更新音乐可视化
-            updateMusicVisualizer();
+                osc.start(startTime);
+                osc.stop(startTime + duration);
 
-            return osc;
+                // 振荡器结束时从集合中移除
+                osc.onended = () => {
+                    activeOscillators.delete(osc);
+                };
+
+                // 更新音乐可视化
+                updateMusicVisualizer();
+
+                return osc;
+            } catch (e) {
+                console.error('播放音符时出错:', e);
+                return null;
+            }
         }
 
         function updateMusicVisualizer() {
@@ -1331,7 +1620,10 @@
                     if (audioContext.state === 'suspended') {
                         audioContext.resume();
                     }
-                    gainNode.gain.value = 0.3;
+                    // 获取当前音量设置
+                    const volumeSlider = document.getElementById('volume-slider');
+                    const volume = volumeSlider ? volumeSlider.value / 100 : 0.3;
+                    gainNode.gain.value = volume;
                     isPlaying = true;
                     this.innerHTML = '<i class="fas fa-volume-up"></i>';
                     document.getElementById('musicVisualizer').classList.add('active');
@@ -1339,6 +1631,57 @@
                 }
             } else {
                 stopMusic();
+            }
+        });
+
+        // 音量控制事件监听器
+        document.getElementById('volume-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const container = document.getElementById('volume-slider-container');
+            const isVisible = container.style.display !== 'none';
+            
+            if (isVisible) {
+                container.style.display = 'none';
+                container.classList.remove('show');
+            } else {
+                container.style.display = 'block';
+                setTimeout(() => container.classList.add('show'), 10);
+            }
+        });
+
+        // 音量滑块控制
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeValue = document.getElementById('volume-value');
+        const volumeBtn = document.getElementById('volume-btn');
+
+        volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            volumeValue.textContent = this.value;
+            
+            // 更新音频音量
+            if (gainNode) {
+                gainNode.gain.value = volume;
+            }
+            
+            // 更新音量按钮图标
+            const icon = volumeBtn.querySelector('i');
+            if (volume === 0) {
+                icon.className = 'fas fa-volume-mute';
+            } else if (volume < 0.5) {
+                icon.className = 'fas fa-volume-down';
+            } else {
+                icon.className = 'fas fa-volume-up';
+            }
+        });
+
+        // 点击外部区域关闭音量控制面板
+        document.addEventListener('click', function(e) {
+            const volumeContainer = document.getElementById('volume-slider-container');
+            const volumeBtn = document.getElementById('volume-btn');
+            
+            if (!volumeBtn.contains(e.target) && !volumeContainer.contains(e.target)) {
+                volumeContainer.style.display = 'none';
+                volumeContainer.classList.remove('show');
             }
         });
 
@@ -1357,6 +1700,19 @@
             }
 
             createDecorativeIcons();
+        });
+
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', cleanupAudioResources);
+        window.addEventListener('pagehide', cleanupAudioResources);
+
+        // 页面失去焦点时暂停音频（节省资源）
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && audioContext && audioContext.state === 'running') {
+                audioContext.suspend();
+            } else if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
         });
     </script>
 </body>
